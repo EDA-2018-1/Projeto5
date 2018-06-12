@@ -69,8 +69,5 @@ Brasil!
 | Tecnico: Tite |
 
 
-![vamocaralho](https://media1.tenor.com/images/21cb4e1429739c40af040d31986fe36e/tenor.gif)
-
-
-
+![Imgur](https://i.imgur.com/TjkQxpc.jpg)
 
