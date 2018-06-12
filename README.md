@@ -51,6 +51,7 @@ Entre outras mil,
 Dos filhos deste solo és mãe gentil,
 Pátria amada,
 Brasil! 
+
 ## Escalação
 |Jogadores      |
 |---------------|
@@ -67,7 +68,8 @@ Brasil!
 | Gabriel J     |
 | Tecnico: Tite |
 
-![](https://media1.tenor.com/images/21cb4e1429739c40af040d31986fe36e/tenor.gif?itemid=10414730)
+
+![vamocaralho](https://media1.tenor.com/images/21cb4e1429739c40af040d31986fe36e/tenor.gif?itemid=10414730)
 
 
 
