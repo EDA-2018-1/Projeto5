@@ -465,6 +465,11 @@ void main()
   root = insert(6, root);
   root = insert(12, root);
   root = insert(14, root);
+  root = insert(30, root);
+  root = insert(31, root);
+  root = insert(32, root);
+  root = insert(33, root);
+  root = insert(7, root);
   print_ascii_tree(root);
 
   

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct no
 {
@@ -17,6 +18,7 @@ void insercao();
 void inserir(struct no** , int);
 No * adicionar(int);
 
+void loadTreeFromFile();
 //Excluir
 void exclusao();
 void excluir(No **, int);
@@ -24,7 +26,7 @@ void excluir(No **, int);
 //funcoes
 int nivel(No*, int, int);
 int altura(No*);
-int comparar(No*, No*);
+// int comparar(No*, No*);
 int contarFolhas(No *);
 int contarNos(No *);
 
@@ -35,6 +37,8 @@ void balancear(No**);
 //Imprecao
 void emOrdem(No *);
 void preOrdem(No *);
+
+int isFull(No *);
 
 struct no * arvore;
 struct no * comp;
@@ -50,7 +54,7 @@ int main ()
         switch(menu())
         {
             case 1:
-                insercao();
+                loadTreeFromFile();
                 break;
             case 2:
                 exclusao();
@@ -86,32 +90,36 @@ int main ()
                     preOrdem(comp);
                 }
                 break;
+            // case 8:
+            //     if(comp == NULL)
+            //     {
+            //         comp = arvore;
+            //         arvore = NULL;
+            //         printf("\nInforme uma nova arvore:\n");
+            //     }
+            //     else
+            //     {
+            //         //comparar(arvore, comp);
+            //         if(comparar(arvore, comp) == 0)
+            //             printf("Arvores iguais");
+            //         else
+            //             printf("As arvores nao sao identicas");
+            //     }
+            //     break;
             case 8:
-                if(comp == NULL)
-                {
-                    comp = arvore;
-                    arvore = NULL;
-                    printf("\nInforme uma nova arvore:\n");
-                }
-                else
-                {
-                    //comparar(arvore, comp);
-                    if(comparar(arvore, comp) == 0)
-                        printf("Arvores iguais");
-                    else
-                        printf("As arvores nao sao identicas");
-                }
-                break;
-            case 9:
                 printf("numero de nos: %d", contarNos(arvore));
                 break;
-            case 10:
+            case 9:
                 printf("numero de folhas: %d", contarFolhas(arvore));
                 break;
-            case 11:
+            case 10:
                 printf("Informe valor: ");
                 scanf("%d", &valor);
                 printf("nivel: %d", nivel(arvore, 1, valor));
+            case 11:
+                printf("isFull");
+                isFull(arvore);
+                break;
         }
     }
 }
@@ -120,32 +128,68 @@ int menu ()
 {
     int opcao;
 
-    printf("\n\n1)insercao\n");
+    printf("\n\n1)escolha o arquivo para carregar arvore\n");
     printf("2)excluir\n");
     printf("3)altura\n");
     printf("4)Verificar Balanceamento\n");
     printf("5)Verificar Balanceamento Perfeito\n");
     printf("6)Balancear\n");
     printf("7)PreOrdem\n");
-    printf("8)Comparar\n");
-    printf("9)Contar Nos\n");
-    printf("10)Contar Folhas\n");
-    printf("11)Nivel\n");
-
-
+    // printf("8)Comparar\n");
+    printf("8)Contar Nos\n");
+    printf("9)Contar Folhas\n");
+    printf("10)Nivel\n");
+    printf("11)isFull\n");
     printf("\nEscolha uma opcao: ");
     scanf("%d", &opcao);
 
     return opcao;
 }
 
-void insercao()
+void loadTreeFromFile()
 {
-    int valor;
-    printf("\n\nInforme o valor: ");
-    scanf("%d", &valor);
+    int numarquivo = 0;
+    printf("\n\nInforme o arquivo entre 1 e 6: ");
+    scanf("%d", &numarquivo);
+    char filename[10];
 
-    inserir(&arvore, valor);
+    switch(numarquivo){
+        case 1:
+            strcpy(filename, "bst1.txt");
+            break;
+        case 2:
+            strcpy(filename, "bst2.txt");
+            break;
+        case 3:
+            strcpy(filename, "bst3.txt");
+            break;
+        case 4:
+            strcpy(filename, "bst4.txt");
+            break;
+        case 5:
+            strcpy(filename, "bst5.txt");
+            break;
+        case 6:
+            strcpy(filename, "bst6.txt");
+            break;
+    }
+
+    printf("%s", filename);
+    FILE *file;
+    int valor;
+
+    file = fopen(filename, "r");
+
+    if (file == NULL){
+        printf("erro no arquivo");
+    return;
+    }
+    else{
+        while (fscanf(file, "%d", &valor) != EOF){
+            inserir(&arvore, valor);
+            printf("%d\n", valor);
+        }
+    }
 }
 
 //Insere um VALOR na arvore
@@ -264,9 +308,6 @@ void excluir(No ** raiz, int valor)
     }
 
 }
-
-
-
 
 //Funcoes
 //Altura
@@ -404,22 +445,22 @@ void balancear(No ** no)
 }
 
 
-//COMPARANDO
-int comparar(No * arv1, No * arv2)
-{
-    if(arv1 == NULL && arv2 == NULL)
-        return 0;
-    else if((arv1 == NULL && arv2 != NULL) || (arv1 != NULL && arv2 == NULL))
-        return 1;
-    else if(arv1->valor == arv2->valor)
-    {
-        return 0 + comparar(arv1->esquerda, arv2->esquerda) + comparar(arv1->direita, arv2->direita);
-    }
-    else
-        return 1;
-}
+// //COMPARANDO
+// int comparar(No * arv1, No * arv2)
+// {
+//     if(arv1 == NULL && arv2 == NULL)
+//         return 0;
+//     else if((arv1 == NULL && arv2 != NULL) || (arv1 != NULL && arv2 == NULL))
+//         return 1;
+//     else if(arv1->valor == arv2->valor)
+//     {
+//         return 0 + comparar(arv1->esquerda, arv2->esquerda) + comparar(arv1->direita, arv2->direita);
+//     }
+//     else
+//         return 1;
+// }
 
-//Imprecao
+//Impressao
 void emOrdem(No * aux)
 {
     if(aux)
@@ -455,3 +496,42 @@ void extensao(No * aux, int nivel)
         extensao(aux->direita, nivel);
     }
 }
+
+int isFull(No* no){
+    if(arvore==NULL) {
+        printf("Árvore vazia\n");
+        return 1;
+    }
+
+    if(arvore->esquerda == NULL && arvore->direita==NULL) {
+        printf("Árvore vazia\n");
+        return 1;
+    }
+
+    if((arvore->esquerda)&&(arvore->direita)) {
+        printf("Árvore cheia \n");
+    }
+}
+
+void imprime(No* no){
+
+
+    int print_pos[NUM_NODES];
+    int i, j, k, pos, x=1, level=0;
+
+    print_pos[0] = 0;
+    for(i=0,j=1; i<NUM_NODES; i++,j++) {
+        pos = print_pos[PARENT(i)] + (i%2?-1:1)*(LINE_WIDTH/(pow(2,level+1))+1);
+
+        for (k=0; k<pos-x; k++) printf("%c",i==0||i%2?' ':'-');
+        printf("%d",tree[i]);
+
+        print_pos[i] = x = pos+1;
+        if (j==pow(2,level)) {
+            printf("\n");
+            level++;
+            x = 1;
+            j = 0;
+        }
+    }
+ }
