@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include<stdbool.h>
 
 typedef struct no
 {
@@ -8,9 +10,10 @@ typedef struct no
     struct no * esquerda;
     struct no * direita;
 }No;
-
+int AddToArray(No* node, int arr[], int i);
 //Prototipos
 int menu();
+void LevelOrder(No*);
 
 //Arvore
 //Inserir
@@ -35,13 +38,18 @@ int perfeitamenteBalanceada(No*);
 int balanceada(No*);
 void balancear(No**);
 //Imprecao
-void emOrdem(No *);
+void preOrder(No *);
+void postOrder(No* );
+void inOrder(No* );
 void preOrdem(No *);
 
-int isFull(No *);
+bool isFull(No *);
 
 struct no * arvore;
 struct no * comp;
+
+void searchValue();
+void printTree(No* p, int);
 
 int main ()
 {
@@ -57,68 +65,36 @@ int main ()
                 loadTreeFromFile();
                 break;
             case 2:
-                exclusao();
+                //showTree();
+                // LevelOrder(arvore);
+                PrintTree(arvore, 0);
                 break;
             case 3:
-                printf("Altura da arvore: %d", altura(arvore));
+                if (isFull(arvore))
+                    printf("Está cheia!\n");
+                 else
+                    printf("Não está cheia!\n");
                 break;
-            case 4:
-                if(balanceada(arvore))
-                    printf("\na arvore esta balanceada\n\n");
-                else
-                    printf("\na arvore nao esta balanceada\n\n");
+          case 4:
+               // searchValue();
                 break;
             case 5:
-                if(!perfeitamenteBalanceada(arvore))
-                    printf("A arvore esta perfeitamente balanceada");
-                else
-                    printf("A arvore nao esta perfeitamente balanceada");
+                printf("Altura da arvore: %d", altura(arvore));
                 break;
             case 6:
-                while(perfeitamenteBalanceada(arvore)>0)
-                {
-                    balancear(&arvore);
-                }
-
-                break;
+                exclusao();
             case 7:
-                printf("Arvore: ");
-                preOrdem(arvore);
-                if(comp)
-                {
-                    printf("\nComp: ");
-                    preOrdem(comp);
-                }
-                break;
-            // case 8:
-            //     if(comp == NULL)
-            //     {
-            //         comp = arvore;
-            //         arvore = NULL;
-            //         printf("\nInforme uma nova arvore:\n");
-            //     }
-            //     else
-            //     {
-            //         //comparar(arvore, comp);
-            //         if(comparar(arvore, comp) == 0)
-            //             printf("Arvores iguais");
-            //         else
-            //             printf("As arvores nao sao identicas");
-            //     }
-            //     break;
+                inOrder(arvore);
             case 8:
-                printf("numero de nos: %d", contarNos(arvore));
+                preOrder(arvore);
                 break;
             case 9:
-                printf("numero de folhas: %d", contarFolhas(arvore));
+                postOrder(arvore);
                 break;
             case 10:
-                printf("Informe valor: ");
-                scanf("%d", &valor);
-                printf("nivel: %d", nivel(arvore, 1, valor));
+                    balancear(&arvore);
             case 11:
-                printf("isFull");
-                isFull(arvore);
+//                return 0;
                 break;
         }
     }
@@ -128,18 +104,17 @@ int menu ()
 {
     int opcao;
 
-    printf("\n\n1)escolha o arquivo para carregar arvore\n");
-    printf("2)excluir\n");
-    printf("3)altura\n");
-    printf("4)Verificar Balanceamento\n");
-    printf("5)Verificar Balanceamento Perfeito\n");
-    printf("6)Balancear\n");
-    printf("7)PreOrdem\n");
-    // printf("8)Comparar\n");
-    printf("8)Contar Nos\n");
-    printf("9)Contar Folhas\n");
-    printf("10)Nivel\n");
-    printf("11)isFull\n");
+    printf("\n\n1)loadTreeFromFile\n");
+    printf("2)showTree\n");
+    printf("3)isFull\n");
+    printf("4)searchValue\n");
+    printf("5)getHeight\n");
+    printf("6)removeValue\n");
+    printf("7)printInOrder\n");
+    printf("8)printPreOrder\n");
+    printf("9)printPostOrder\n");
+    printf("10)balanceTree\n");
+    printf("11)EXIT\n");
     printf("\nEscolha uma opcao: ");
     scanf("%d", &opcao);
 
@@ -174,7 +149,7 @@ void loadTreeFromFile()
             break;
     }
 
-    printf("%s", filename);
+    printf("\nArquivo escolhido: %s", filename);
     FILE *file;
     int valor;
 
@@ -185,9 +160,10 @@ void loadTreeFromFile()
     return;
     }
     else{
+        printf("\nDados do arquivo: ");
         while (fscanf(file, "%d", &valor) != EOF){
             inserir(&arvore, valor);
-            printf("%d\n", valor);
+            printf(" %d", valor);
         }
     }
 }
@@ -370,6 +346,7 @@ int contarNos(No * no)
 //balancear
 int perfeitamenteBalanceada(No * no)
 {
+
     if(altura(no) == 0)
     {
         return 0;
@@ -390,6 +367,7 @@ int perfeitamenteBalanceada(No * no)
         }
     }
 }
+
 int balanceada(No * no)
 {
     if(altura(no) == 0)
@@ -444,32 +422,7 @@ void balancear(No ** no)
     }
 }
 
-
-// //COMPARANDO
-// int comparar(No * arv1, No * arv2)
-// {
-//     if(arv1 == NULL && arv2 == NULL)
-//         return 0;
-//     else if((arv1 == NULL && arv2 != NULL) || (arv1 != NULL && arv2 == NULL))
-//         return 1;
-//     else if(arv1->valor == arv2->valor)
-//     {
-//         return 0 + comparar(arv1->esquerda, arv2->esquerda) + comparar(arv1->direita, arv2->direita);
-//     }
-//     else
-//         return 1;
-// }
-
 //Impressao
-void emOrdem(No * aux)
-{
-    if(aux)
-    {
-        emOrdem(aux->esquerda);
-        printf("%d ", aux->valor);
-        emOrdem(aux->direita);
-    }
-}
 
 void preOrdem(No * aux)
 {
@@ -482,6 +435,30 @@ void preOrdem(No * aux)
     else
         printf("NULL ");
 
+}
+
+void preOrder(No* arvore) {
+    if(arvore != NULL) {
+        printf("%d ", arvore->valor);
+        preOrdem(arvore->esquerda);
+        preOrdem(arvore->direita);
+    }
+}
+
+void inOrder(No* arvore){
+    if(arvore != NULL){
+        inOrder(arvore->esquerda);
+        printf("%d ", arvore->valor);
+        inOrder(arvore->direita);
+    }
+}
+
+void postOrder(No* arvore){
+    if(arvore != NULL){
+        postOrder(arvore->esquerda);
+        postOrder(arvore->direita);
+        printf("%d ", arvore->valor);
+    }
 }
 
 void extensao(No * aux, int nivel)
@@ -497,41 +474,141 @@ void extensao(No * aux, int nivel)
     }
 }
 
-int isFull(No* no){
-    if(arvore==NULL) {
-        printf("Árvore vazia\n");
-        return 1;
+bool isFull (No* root)
+{
+    if (root == NULL)
+        return true;
+
+    if (root->esquerda == NULL && root->direita == NULL)
+        return true;
+
+    if ((root->esquerda) && (root->direita))
+        return (isFull(root->esquerda) && isFull(root->direita));
+    return false;
+}
+
+// #define LINE_WIDTH 70
+// #define PARENT(i) ((i-1) / 2)
+
+// void LevelOrder(No* root) {
+//     int i = 0;
+//     int* tree; // Here we just need to take an array of maximum size
+//     int h = altura(arvore);
+//     int aux;
+//     int size = ((pow(2, h+1))-1);
+
+//     tree = calloc(size, sizeof(int));
+
+//     AddToArray(root, tree, i);
+
+//     int print_pos[size];
+//     int j, k, pos, x=1, level=0;
+
+//     print_pos[0] = 0;
+//     for(i=0,j=1; i<size; i++,j++) {
+//         pos = print_pos[PARENT(i)] + (i%2?-1:1)*(LINE_WIDTH/(pow(2,level+1))+1);
+
+//         for (k=0; k<pos-x; k++) printf("%c",i==0||i%2?' ':' ');
+        
+//         if (tree[i]==0){
+//             printf("N");
+//         }
+//         else{
+//         printf("%d",tree[i]);
+//         }
+//         print_pos[i] = x = pos+1;
+//         if (j==pow(2,level)) {
+//             printf("\n");
+//             level++;
+//             x = 1;
+//             j = 0;
+//         }
+//     }
+//     printf("\n");
+//     return;
+// }
+
+// int AddToArray(No* node, int arr[], int i)
+// {
+//      if(node == NULL){
+//           return i;
+//      }
+
+//     arr[i] = node->valor;
+//     node->esquerda != NULL ? (i = AddToArray(node->esquerda, arr, i+1)) : (i = AddToArray(0, arr, i+1)); 
+//     node->direita != NULL ? (i = AddToArray(node->direita, arr, i+1)) : (i = AddToArray(0, arr, i+1)); 
+//     return i++;
+// }
+
+#define PARENT(i) ((i-1) / 2)
+#define LINE_WIDTH 70
+
+void LevelOrder(No* arvore)
+{
+    int h = altura(arvore);
+    int aux;
+    int NUM_NODES = ((pow(2, h+1))-1);
+    int tree[NUM_NODES];
+    int print_pos[NUM_NODES];
+
+    for (aux=1; aux<=h; aux++)
+    {
+        printGivenLevel(arvore, aux);
+        printf("\n");
     }
 
-    if(arvore->esquerda == NULL && arvore->direita==NULL) {
-        printf("Árvore vazia\n");
-        return 1;
-    }
+    // int i, j, k, pos, x=1, level=0;
 
-    if((arvore->esquerda)&&(arvore->direita)) {
-        printf("Árvore cheia \n");
+    // print_pos[0] = 0;
+    // for(i=0,j=1; i<NUM_NODES; i++,j++) {
+    //     pos = print_pos[PARENT(i)] + (i%2?-1:1)*(LINE_WIDTH/(pow(2,level+1))+1);
+
+    //     for (k=0; k<pos-x; k++) printf("%c",i==0||i%2?' ':' ');
+        
+    //     if (tree[i]==0){
+    //         printf("N");
+    //     }
+    //     else{
+    //     printf("%d",tree[i]);
+    //     }
+    //     print_pos[i] = x = pos+1;
+    //     if (j==pow(2,level)) {
+    //         printf("\n");
+    //         level++;
+    //         x = 1;
+    //         j = 0;
+    //     }
+    // }
+
+}
+ 
+/* Print nodes at a given level */
+void printGivenLevel(No* arvore, int level)
+{
+    int tabs;
+    if (arvore == NULL)
+        return;
+    if (level == 1){
+        tabs = 4*level;
+        printf("%*d ", tabs, arvore->valor);
+    }
+        
+    else if (level > 1)
+    {
+        printGivenLevel(arvore->esquerda, level-1);
+        printGivenLevel(arvore->direita, level-1);
     }
 }
 
-void imprime(No* no){
-
-
-    int print_pos[NUM_NODES];
-    int i, j, k, pos, x=1, level=0;
-
-    print_pos[0] = 0;
-    for(i=0,j=1; i<NUM_NODES; i++,j++) {
-        pos = print_pos[PARENT(i)] + (i%2?-1:1)*(LINE_WIDTH/(pow(2,level+1))+1);
-
-        for (k=0; k<pos-x; k++) printf("%c",i==0||i%2?' ':'-');
-        printf("%d",tree[i]);
-
-        print_pos[i] = x = pos+1;
-        if (j==pow(2,level)) {
-            printf("\n");
-            level++;
-            x = 1;
-            j = 0;
-        }
+void PrintTree(No * tp, int spaces) {
+  int i;
+  if (tp != NULL) {
+    PrintTree(tp->direita, spaces + 4);
+    for (i = 0; i < spaces; i++) {
+      printf(" ");
     }
- }
+    printf("%d\n", tp-> valor);
+    PrintTree(tp->esquerda, spaces + 4);
+  }
+  printf("\n");
+}
