@@ -24,7 +24,7 @@ No * adicionar(int);
 void loadTreeFromFile();
 //Excluir
 void exclusao();
-void excluir(No **, int);
+No* excluir(No*, int);
 
 //funcoes
 int nivel(No*, int, int);
@@ -48,9 +48,9 @@ bool isFull(No *);
 struct no * arvore;
 struct no * comp;
 
-void searchValue();
-void printTree(No* p, int);
-
+//void searchValue();
+void printLevelOrder(No*);
+void printGivenLevel(No*, int);
 int main ()
 {
     int valor;
@@ -65,9 +65,7 @@ int main ()
                 loadTreeFromFile();
                 break;
             case 2:
-                //showTree();
-                // LevelOrder(arvore);
-                PrintTree(arvore, 0);
+                 printTree(arvore, 0);
                 break;
             case 3:
                 if (isFull(arvore))
@@ -76,15 +74,17 @@ int main ()
                     printf("Não está cheia!\n");
                 break;
           case 4:
-               // searchValue();
+  //              searchValue();
                 break;
             case 5:
                 printf("Altura da arvore: %d", altura(arvore));
                 break;
             case 6:
                 exclusao();
+                break;
             case 7:
                 inOrder(arvore);
+                break;
             case 8:
                 preOrder(arvore);
                 break;
@@ -92,9 +92,13 @@ int main ()
                 postOrder(arvore);
                 break;
             case 10:
-                    balancear(&arvore);
+                if(balanceada(arvore))
+                     printf("\na arvore esta balanceada\n\n");
+                 else
+                     balancear(&arvore);
+                break;
             case 11:
-//                return 0;
+                return 0;
                 break;
         }
     }
@@ -152,6 +156,7 @@ void loadTreeFromFile()
     printf("\nArquivo escolhido: %s", filename);
     FILE *file;
     int valor;
+    arvore = NULL;
 
     file = fopen(filename, "r");
 
@@ -221,69 +226,67 @@ void exclusao()
     printf("\nInforme valor para exlcuir: ");
     scanf("%d", &valor);
 
-    excluir(&arvore, valor);
+    arvore = excluir(arvore, valor);
 }
 
-void excluir(No ** raiz, int valor)
+No* minValueNode(No* node)
 {
-    if(*raiz == NULL)
-    {
-        printf("\nNao foi possivel excluir.\n");
-    }
-    else if((*raiz)->valor == valor)
-    {
-        No * excluir = *raiz;
-        No * auxAnt = *raiz;
+    No* current = node;
+ 
+    /* loop down to find the leftmost leaf */
+    while (current->esquerda != NULL)
+        current = current->esquerda;
 
-        int esq = altura((*raiz)->esquerda);
-        int dir = altura((*raiz)->direita);
+    return current;
+}
 
-        if(excluir->esquerda == NULL && excluir->direita == NULL)
-        {
-            *raiz = NULL;
-        }
-        else if(esq > dir)
-        {
-            *raiz = (*raiz)->esquerda;
-            while((*raiz)->direita != NULL)
-            {
-                auxAnt = *raiz;
-                *raiz = (*raiz)->direita;
-            }
-            auxAnt->direita = NULL;
-
-            if(excluir->esquerda != NULL)
-                inserirNo(&(*raiz), excluir->esquerda);
-            if(excluir->direita != NULL)
-                inserirNo(&(*raiz), excluir->direita);
-        }
-        else if( esq <= dir)
-        {
-            *raiz = (*raiz)->direita;
-            while((*raiz)->esquerda != NULL)
-            {
-                auxAnt = *raiz;
-                *raiz = (*raiz)->esquerda;
-            }
-            if(excluir != auxAnt)
-                auxAnt->esquerda = NULL;
-
-            if(excluir->esquerda != NULL)
-                inserirNo(&(*raiz), excluir->esquerda);
-            if(excluir->esquerda != NULL)
-                inserirNo(&(*raiz), excluir->direita);
-        }
-        free(excluir);
-    }
+No* excluir(No* root, int key)
+{
+    // base case
+    if (root == NULL) return root;
+ 
+    // If the key to be deleted is smaller than the root's key,
+    // then it lies in left subtree
+    if (key < root->valor)
+        root->esquerda = excluir(root->esquerda, key);
+ 
+    // If the key to be deleted is greater than the root's key,
+    // then it lies in right subtree
+    else if (key > root->valor)
+        root->direita = excluir(root->direita, key);
+ 
+    // if key is same as root's key, then This is the node
+    // to be deleted
     else
     {
-        if(valor < (*raiz)->valor)
-            excluir( &(*raiz)->esquerda, valor);
-        else if(valor > (*raiz)->valor)
-            excluir( &(*raiz)->direita, valor);
+        // node with only one child or no child
+        if (root->esquerda == NULL)
+        {
+            No *temp = root->direita;
+            free(root);
+            return temp;
+        }
+        else if (root->direita == NULL)
+        {
+            No *temp = root->esquerda;
+            free(root);
+            return temp;
+        }
+ 
+        // node with two children: Get the inorder successor (smallest
+        // in the right subtree)
+        No* temp = minValueNode(root->direita);
+ 
+        // Copy the inorder successor's content to this node
+        root->valor = temp->valor;
+ 
+        // Delete the inorder successor
+        root->direita = excluir(root->direita, temp->valor);
     }
-
+    return root;
 }
+
+
 
 //Funcoes
 //Altura
@@ -438,28 +441,35 @@ void preOrdem(No * aux)
 }
 
 void preOrder(No* arvore) {
+    
     if(arvore != NULL) {
+
         printf("%d ", arvore->valor);
-        preOrdem(arvore->esquerda);
-        preOrdem(arvore->direita);
+        preOrder(arvore->esquerda);
+        preOrder(arvore->direita);
     }
 }
 
+/* Print in-order */
 void inOrder(No* arvore){
+
     if(arvore != NULL){
+    
         inOrder(arvore->esquerda);
         printf("%d ", arvore->valor);
         inOrder(arvore->direita);
     }
 }
-
 void postOrder(No* arvore){
+
     if(arvore != NULL){
+    
         postOrder(arvore->esquerda);
         postOrder(arvore->direita);
         printf("%d ", arvore->valor);
     }
 }
+
 
 void extensao(No * aux, int nivel)
 {
@@ -487,128 +497,23 @@ bool isFull (No* root)
     return false;
 }
 
-// #define LINE_WIDTH 70
-// #define PARENT(i) ((i-1) / 2)
-
-// void LevelOrder(No* root) {
-//     int i = 0;
-//     int* tree; // Here we just need to take an array of maximum size
-//     int h = altura(arvore);
-//     int aux;
-//     int size = ((pow(2, h+1))-1);
-
-//     tree = calloc(size, sizeof(int));
-
-//     AddToArray(root, tree, i);
-
-//     int print_pos[size];
-//     int j, k, pos, x=1, level=0;
-
-//     print_pos[0] = 0;
-//     for(i=0,j=1; i<size; i++,j++) {
-//         pos = print_pos[PARENT(i)] + (i%2?-1:1)*(LINE_WIDTH/(pow(2,level+1))+1);
-
-//         for (k=0; k<pos-x; k++) printf("%c",i==0||i%2?' ':' ');
-        
-//         if (tree[i]==0){
-//             printf("N");
-//         }
-//         else{
-//         printf("%d",tree[i]);
-//         }
-//         print_pos[i] = x = pos+1;
-//         if (j==pow(2,level)) {
-//             printf("\n");
-//             level++;
-//             x = 1;
-//             j = 0;
-//         }
-//     }
-//     printf("\n");
-//     return;
-// }
-
-// int AddToArray(No* node, int arr[], int i)
-// {
-//      if(node == NULL){
-//           return i;
-//      }
-
-//     arr[i] = node->valor;
-//     node->esquerda != NULL ? (i = AddToArray(node->esquerda, arr, i+1)) : (i = AddToArray(0, arr, i+1)); 
-//     node->direita != NULL ? (i = AddToArray(node->direita, arr, i+1)) : (i = AddToArray(0, arr, i+1)); 
-//     return i++;
-// }
-
-#define PARENT(i) ((i-1) / 2)
-#define LINE_WIDTH 70
-
-void LevelOrder(No* arvore)
+int rec[1000006];
+void printTree(No* curr,int depth)
 {
-    int h = altura(arvore);
-    int aux;
-    int NUM_NODES = ((pow(2, h+1))-1);
-    int tree[NUM_NODES];
-    int print_pos[NUM_NODES];
-
-    for (aux=1; aux<=h; aux++)
-    {
-        printGivenLevel(arvore, aux);
-        printf("\n");
-    }
-
-    // int i, j, k, pos, x=1, level=0;
-
-    // print_pos[0] = 0;
-    // for(i=0,j=1; i<NUM_NODES; i++,j++) {
-    //     pos = print_pos[PARENT(i)] + (i%2?-1:1)*(LINE_WIDTH/(pow(2,level+1))+1);
-
-    //     for (k=0; k<pos-x; k++) printf("%c",i==0||i%2?' ':' ');
-        
-    //     if (tree[i]==0){
-    //         printf("N");
-    //     }
-    //     else{
-    //     printf("%d",tree[i]);
-    //     }
-    //     print_pos[i] = x = pos+1;
-    //     if (j==pow(2,level)) {
-    //         printf("\n");
-    //         level++;
-    //         x = 1;
-    //         j = 0;
-    //     }
-    // }
-
-}
- 
-/* Print nodes at a given level */
-void printGivenLevel(No* arvore, int level)
-{
-    int tabs;
-    if (arvore == NULL)
+    int i;
+    if(curr==NULL){
         return;
-    if (level == 1){
-        tabs = 4*level;
-        printf("%*d ", tabs, arvore->valor);
     }
-        
-    else if (level > 1)
-    {
-        printGivenLevel(arvore->esquerda, level-1);
-        printGivenLevel(arvore->direita, level-1);
+    printf("\t");
+    for(i=0;i<depth;i++){
+        if(i==depth-1)
+            printf("%s\u2014\u2014\u2014",rec[depth-1]?"\u0371":"\u221F");
+        else
+            printf("%s   ",rec[i]?"\u23B8":"  ");
     }
-}
-
-void PrintTree(No * tp, int spaces) {
-  int i;
-  if (tp != NULL) {
-    PrintTree(tp->direita, spaces + 4);
-    for (i = 0; i < spaces; i++) {
-      printf(" ");
-    }
-    printf("%d\n", tp-> valor);
-    PrintTree(tp->esquerda, spaces + 4);
-  }
-  printf("\n");
+    printf("%d\n",curr->valor);
+    rec[depth]=1;
+    printTree(curr->esquerda,depth+1);
+    rec[depth]=0;
+    printTree(curr->direita,depth+1);
 }
